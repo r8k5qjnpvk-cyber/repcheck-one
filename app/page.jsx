@@ -127,14 +127,14 @@ function AuthenticationUpload() {
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
-    if (files.length + images.length > 5) {
-      setError("Maximum 5 images allowed")
+    if (files.length + images.length > 2) {
+      setError("Maximum 2 images allowed")
       return
     }
     
     files.forEach(file => {
-      if (file.size > 10 * 1024 * 1024) {
-        setError("Each image must be under 10MB")
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Each image must be under 5MB")
         return
       }
       const reader = new FileReader()
@@ -169,71 +169,32 @@ function AuthenticationUpload() {
     setResult(null)
 
     try {
-      const imageContents = images.map(img => ({
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: img.file.type,
-          data: img.base64
-        }
+      // Prepare images for the worker
+      const imageData = images.map(img => ({
+        base64: img.base64,
+        mediaType: img.file.type
       }))
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      // Call our Cloudflare Worker (keeps API key secure)
+      const response = await fetch("https://repcheck-authenticate.calfinnegan.workers.dev", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 2000,
-          messages: [{
-            role: "user",
-            content: [
-              ...imageContents,
-              {
-                type: "text",
-                text: `You are an expert luxury goods authenticator. Analyze these images of a ${brand} ${category.replace('s', '')} and provide an authentication assessment.
-
-IMPORTANT: Provide your analysis in the following JSON format ONLY, no other text:
-{
-  "verdict": "LIKELY GENUINE" or "LIKELY REPLICA" or "INCONCLUSIVE",
-  "confidence": 0-100,
-  "summary": "Brief 1-2 sentence summary",
-  "details": [
-    {"marker": "marker name", "status": "pass" or "fail" or "unclear", "note": "explanation"}
-  ],
-  "recommendations": ["recommendation 1", "recommendation 2"]
-}
-
-Analyze: stitching quality, hardware/materials, fonts/engravings, serial numbers if visible, overall craftsmanship, common replica tells for this brand. Be thorough but concise.`
-              }
-            ]
-          }]
+          images: imageData,
+          category: category,
+          brand: brand
         })
       })
 
       const data = await response.json()
       
       if (data.error) {
-        throw new Error(data.error.message || "Authentication failed")
+        throw new Error(data.error || "Authentication failed")
       }
 
-      const text = data.content[0].text
-      // Try to parse JSON from response
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        setResult(parsed)
-      } else {
-        // Fallback if not proper JSON
-        setResult({
-          verdict: "INCONCLUSIVE",
-          confidence: 50,
-          summary: text.substring(0, 200),
-          details: [],
-          recommendations: ["Please try again with clearer images"]
-        })
-      }
+      setResult(data)
     } catch (err) {
       setError(err.message || "Authentication failed. Please try again.")
     } finally {
@@ -285,7 +246,7 @@ Analyze: stitching quality, hardware/materials, fonts/engravings, serial numbers
               <>
                 <div style={{fontSize:48,marginBottom:12}}>📷</div>
                 <div style={{fontSize:15,fontWeight:600,marginBottom:4}}>Drop images here or click to upload</div>
-                <div style={{fontSize:12,color:C.textLight}}>Up to 5 images, max 10MB each · JPG, PNG, HEIC</div>
+                <div style={{fontSize:12,color:C.textLight}}>Up to 2 images, max 5MB each · JPG, PNG</div>
               </>
             ) : (
               <div style={{display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
@@ -298,7 +259,7 @@ Analyze: stitching quality, hardware/materials, fonts/engravings, serial numbers
                     >×</button>
                   </div>
                 ))}
-                {images.length < 5 && (
+                {images.length < 2 && (
                   <div style={{width:80,height:80,borderRadius:8,border:`2px dashed ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:C.textLight}}>+</div>
                 )}
               </div>
