@@ -3,6 +3,9 @@
 
 import { AUTH_DATABASE } from '@/lib/authDatabase'
 
+// Required for Cloudflare Pages
+export const runtime = 'edge'
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('q')?.toLowerCase() || ''
