@@ -490,10 +490,9 @@ function HomePage({setPage}) {
       <AuthenticationUpload />
 
       {/* Stats Bar */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:32}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:32}}>
         <StatBox value="200+" label="Brands Covered"/>
         <StatBox value="94.7%" label="Accuracy Rate"/>
-        <StatBox value="48K+" label="Community Members"/>
         <StatBox value="<10s" label="Average Result Time"/>
       </div>
 
