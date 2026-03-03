@@ -259,34 +259,6 @@ function HomePage({setPage}) {
         </div>
       </div>
 
-      {/* Subscription Tiers */}
-      <div style={{marginBottom:32}}>
-        <div style={{textAlign:"center",marginBottom:20}}>
-          <Label>Pricing That Makes Sense</Label>
-          <h2 style={{fontFamily:"var(--d)",fontSize:28,fontWeight:500}}>Choose Your Plan</h2>
-          <p style={{fontSize:13,color:C.textMid,marginTop:4}}>Pay 50% less with $REPCHK tokens — price adjusts with the live crypto rate</p>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
-          {[
-            {name:"Free",price:"£0",crypto:null,period:"forever",badge:null,features:["5 checks / month","Full authentication report","Factory identification","Community forum access","Basic thread analysis"],cta:"Get Started Free"},
-            {name:"Pro",price:"£6.99",crypto:"~18 $REPCHK",period:"/month",badge:"MOST POPULAR",features:["50 checks / month","Priority results","QC grading","Sound identifier","Thread counter pro","Ad-free experience"],cta:"Start Pro"},
-            {name:"Elite",price:"£14.99",crypto:"~40 $REPCHK",period:"/month",badge:"BEST VALUE",features:["Unlimited checks","Dealer-grade reports","All Pro features","API access","White-label reports","Dedicated support"],cta:"Go Elite"},
-          ].map(p=>(
-            <div key={p.name} className="card" style={{position:"relative",border:p.badge?`2px solid ${C.gold}`:`1px solid ${C.border}`,padding:28}}>
-              {p.badge && <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:C.gold,color:"#fff",padding:"4px 14px",borderRadius:100,fontSize:10,fontWeight:700,letterSpacing:".05em"}}>{p.badge}</div>}
-              <div style={{textAlign:"center",marginBottom:16}}>
-                <div style={{fontSize:18,fontWeight:700}}>{p.name}</div>
-                <div style={{fontFamily:"var(--d)",fontSize:36,fontWeight:500,color:C.gold,margin:"8px 0 2px"}}>{p.price}</div>
-                <div style={{fontSize:12,color:C.textLight}}>{p.period}</div>
-                {p.crypto && <div style={{fontSize:11,color:C.green,fontWeight:600,marginTop:4,background:C.greenBg,display:"inline-block",padding:"3px 10px",borderRadius:100}}>or {p.crypto} (50% off)</div>}
-              </div>
-              {p.features.map(f=><div key={f} style={{padding:"6px 0",fontSize:13,color:C.textMid,borderBottom:`1px solid ${C.bg2}`}}>✓ {f}</div>)}
-              <button className="btn btn-gold" style={{width:"100%",marginTop:16}}>{p.cta}</button>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <AdSlot size="300×250" label="Google AdSense — Medium Rectangle"/>
 
       {/* Brand Coverage */}
@@ -587,15 +559,11 @@ function AdminPage() {
           </div>
         </div>
         <div className="card">
-          <Label>Subscriber Breakdown</Label>
-          {[{t:"Free",c:d.subs.free,cl:C.textLight},{t:"Pro (£6.99)",c:d.subs.pro,cl:C.blue},{t:"Elite (£14.99)",c:d.subs.elite,cl:C.gold}].map(s=>(
-            <div key={s.t} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.bg2}`}}>
-              <span style={{fontSize:13}}>{s.t}</span>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <div style={{width:120,height:6,background:C.bg2,borderRadius:3}}><div style={{width:`${s.c/(d.subs.free)*100}%`,height:"100%",background:s.cl,borderRadius:3}}/></div>
-                <span style={{fontFamily:"var(--d)",fontSize:14,color:s.cl,minWidth:50,textAlign:"right"}}>{s.c.toLocaleString()}</span>
-              </div>
-            </div>
+          <Label>User Statistics</Label>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.bg2}`}}>
+            <span style={{fontSize:13}}>Total Users</span>
+            <span style={{fontFamily:"var(--d)",fontSize:14,color:C.gold,minWidth:50,textAlign:"right"}}>{d.subs.free.toLocaleString()}</span>
+          </div>
           ))}
         </div>
       </div>
@@ -734,7 +702,7 @@ function Footer() {
         </div>
         <div style={{display:"flex",gap:32}}>
           {[
-            {h:"Product",ls:["Authenticate","Community","$REPCHK","Tools","Pricing"]},
+            {h:"Product",ls:["Authenticate","Community","$REPCHK","Tools"]},
             {h:"Company",ls:["About Us","Contact","Privacy Policy","Terms of Service","Cookie Policy"]},
             {h:"Connect",ls:["Twitter / X","Discord","TikTok","Instagram","YouTube"]},
           ].map(col=>(
