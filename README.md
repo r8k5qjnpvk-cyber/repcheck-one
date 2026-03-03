@@ -75,3 +75,4 @@ See `docs/IMPLEMENTATION-GUIDE.md` for the full step-by-step guide covering:
 - Pro subscriptions (£9.99/mo)
 - Elite subscriptions (£24.99/mo)
 - $REPCHK token economy
+
