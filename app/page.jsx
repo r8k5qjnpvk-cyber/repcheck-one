@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 //  Complete platform: Auth · Forum · $REPCHK · Admin · Tools
 // ═══════════════════════════════════════════════════════════════
 
-const P = { home: 0, forum: 1, token: 2, tools: 3, admin: 4, guides: 5 }
+const P = { home: 0, forum: 1, token: 2, tools: 3, admin: 4, guides: 5, privacy: 6, terms: 7, about: 8, contact: 9 }
 
 // ─── DESIGN TOKENS (LIGHT THEME) ────────────────────────────
 const C = {
@@ -46,7 +46,7 @@ const ADMIN_DATA = {
   visitors: { today: 3847, week: 24192, month: 89431, trend: "+12.3%" },
   uploads: { today: 412, week: 2891, month: 11204, trend: "+8.7%" },
   subs: { free: 12840, pro: 1247, elite: 389, trend: "+15.2%" },
-  revenue: { ads: "£847", affiliates: "£1,203", subs: "£4,891", crypto: "£2,104" },
+  revenue: { ads: "£847", affiliates: "£1,203" },
   topSearches: [
     { item: "Rolex Submariner", count: 1847 }, { item: "Louis Vuitton Neverfull", count: 1203 },
     { item: "Jordan 4 Travis Scott", count: 989 }, { item: "Chanel Classic Flap", count: 876 },
@@ -109,7 +109,7 @@ const AdSlot = ({size = "728×90", label = "Advertisement"}) => (
 // ─── NAV ─────────────────────────────────────────────────────
 function Nav({page, setPage}) {
   const links = [
-    {p:P.home, l:"Authenticate"}, {p:P.forum, l:"Community"}, {p:P.token, l:"$REPCHK"},
+    {p:P.home, l:"Authenticate"}, {p:P.forum, l:"Community"},
     {p:P.tools, l:"Tools"}, {p:P.guides, l:"Guides"}
   ]
   return (
@@ -180,8 +180,8 @@ function HomePage({setPage}) {
 
       {/* Press Bar */}
       <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:28,padding:"16px 0 28px",flexWrap:"wrap",opacity:.35}}>
-        <span style={{fontSize:10,color:C.textDim,fontWeight:600,letterSpacing:".15em",textTransform:"uppercase"}}>Featured in</span>
-        {["HYPEBEAST","HIGHSNOBIETY","COMPLEX","GQ","WIRED","ESQUIRE"].map(p=>
+        <span style={{fontSize:10,color:C.textDim,fontWeight:600,letterSpacing:".15em",textTransform:"uppercase"}}>Authentication Categories</span>
+        {["WATCHES","HANDBAGS","SNEAKERS","CLOTHING","SUNGLASSES","JEWELRY"].map(p=>
           <span key={p} style={{fontSize:12,fontWeight:700,letterSpacing:".12em",color:C.textMid}}>{p}</span>
         )}
       </div>
@@ -220,19 +220,21 @@ function HomePage({setPage}) {
 
       <AdSlot size="728×90" label="Google AdSense — Leaderboard"/>
 
-      {/* Testimonials */}
+      {/* How It Works */}
       <div style={{marginBottom:32}}>
-        <Label>What People Are Saying</Label>
+        <Label>How RepCheck Works</Label>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:12,marginTop:12}}>
           {[
-            {q:"Saved me from an £8,000 fake Submariner. The rehaut analysis spotted something I'd have missed completely.",n:"James T.",r:"Watch collector, London"},
-            {q:"RepCheck is part of our intake process now. We've caught 23 fakes in the last month alone.",n:"Sarah M.",r:"Consignment store owner, Manchester"},
-            {q:"Posted dodgy Travis Scotts and had three verified experts respond within ten minutes. Community is unreal.",n:"Kyle R.",r:"Sneaker reseller, Birmingham"},
-          ].map(t=>(
-            <div key={t.n} className="card" style={{borderLeft:`3px solid ${C.gold}`}}>
-              <p style={{fontFamily:"var(--d)",fontSize:15,fontStyle:"italic",color:C.textMid,lineHeight:1.7,marginBottom:12}}>"{t.q}"</p>
-              <div style={{fontSize:13,fontWeight:600,color:C.gold}}>{t.n}</div>
-              <div style={{fontSize:11,color:C.textLight}}>{t.r}</div>
+            {step:"1",t:"Upload Your Item",d:"Take clear photos of the item you want to authenticate — include serial numbers, stitching, hardware, and any labels."},
+            {step:"2",t:"AI Analysis",d:"Our system compares your photos against our database of genuine items and known replica tells from verified sources."},
+            {step:"3",t:"Get Your Report",d:"Receive a detailed breakdown of authentication markers, factory identification, and confidence score within seconds."},
+          ].map(s=>(
+            <div key={s.step} className="card" style={{borderLeft:`3px solid ${C.gold}`}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:8}}>
+                <div style={{width:32,height:32,borderRadius:"50%",background:C.goldBg,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--d)",fontSize:18,color:C.gold,fontWeight:600}}>{s.step}</div>
+                <div style={{fontSize:14,fontWeight:600}}>{s.t}</div>
+              </div>
+              <p style={{fontSize:13,color:C.textMid,lineHeight:1.7}}>{s.d}</p>
             </div>
           ))}
         </div>
@@ -290,7 +292,7 @@ function ForumPage() {
         <div>
           <Label c={C.gold}>Community Forum — Free For Everyone</Label>
           <h2 style={{fontFamily:"var(--d)",fontSize:28,fontWeight:500}}>Legit Checks & Discussion</h2>
-          <p style={{fontSize:13,color:C.textMid,marginTop:4}}>Post photos, get expert opinions, earn $REPCHK tokens for every upvote you receive.</p>
+          <p style={{fontSize:13,color:C.textMid,marginTop:4}}>Post photos, get expert opinions from our community of collectors and authentication enthusiasts.</p>
         </div>
         <button className="btn btn-gold">+ New Post</button>
       </div>
@@ -324,7 +326,6 @@ function ForumPage() {
                 <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
                   <span style={{fontSize:11,fontWeight:600,color:post.verified?C.gold:C.textMid}}>{post.user}{post.verified&&" ✓"}</span>
                   <span className="tag" style={{background:`${LVL_C[post.level]}12`,color:LVL_C[post.level],fontSize:9}}>{post.level}</span>
-                  <span style={{fontSize:10,color:C.textLight}}>{post.rep} $REPCHK</span>
                   <span style={{fontSize:10,color:C.textLight}}>📷 {post.imgs}</span>
                   <span style={{fontSize:10,color:C.textLight}}>{post.time} ago</span>
                 </div>
@@ -344,10 +345,6 @@ function ForumPage() {
                   <button className="btn btn-out" style={{padding:"8px 16px",fontSize:11}}>💬 Reply</button>
                   <button className="btn btn-out" style={{padding:"8px 16px",fontSize:11}}>🔍 Run Check</button>
                   <button className="btn btn-out" style={{padding:"8px 16px",fontSize:11}}>🔗 Share</button>
-                </div>
-                <div style={{marginTop:12,padding:12,background:C.greenBg,border:`1px solid ${C.green}20`,borderRadius:8}}>
-                  <div style={{fontSize:10,fontWeight:700,color:C.green,letterSpacing:".08em"}}>EARN $REPCHK BY HELPING</div>
-                  <div style={{fontSize:12,color:C.textMid,marginTop:2}}>Every upvote on your reply earns you +0.1 $REPCHK. Verified correct authentications earn +2 $REPCHK.</div>
                 </div>
               </div>
             )}
@@ -555,7 +552,7 @@ function AdminPage() {
           ))}
           <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",marginTop:4}}>
             <span style={{fontSize:14,fontWeight:700}}>Total Monthly</span>
-            <span style={{fontFamily:"var(--d)",fontSize:20,fontWeight:600,color:C.green}}>£9,045</span>
+            <span style={{fontFamily:"var(--d)",fontSize:20,fontWeight:600,color:C.green}}>£2,050</span>
           </div>
         </div>
         <div className="card">
@@ -564,7 +561,6 @@ function AdminPage() {
             <span style={{fontSize:13}}>Total Users</span>
             <span style={{fontFamily:"var(--d)",fontSize:14,color:C.gold,minWidth:50,textAlign:"right"}}>{d.subs.free.toLocaleString()}</span>
           </div>
-          ))}
         </div>
       </div>
 
@@ -625,23 +621,6 @@ function GuidesPage() {
 **Easiest way:** Sign up for **Skimlinks** (skimlinks.com). They automatically turn ANY product link on your site into an affiliate link. One signup, 48,000+ retailers. They pay you via PayPal or bank transfer.
 
 **How I've integrated this:** The "Buy From Trusted Partners" section on the homepage has slots for each affiliate. Replace the placeholder links with your unique affiliate URLs.`},
-    { t: "🪙 Launching $REPCHK Crypto (Cheapest Possible Way)", content: `
-**Total cost: Under £5**
-
-**Step 1:** Install Phantom wallet (phantom.app) on your phone
-**Step 2:** Buy £5 worth of SOL on Coinbase or Binance, send to your Phantom wallet
-**Step 3:** Go to pump.fun
-**Step 4:** Click "Create Token"
-**Step 5:** Enter: Name = "RepCheck", Symbol = "REPCHK", add your logo, write description
-**Step 6:** Click Create — costs about 0.01 SOL (~£1.50)
-
-**IMPORTANT — Keep Mint Authority!** This lets you create MORE tokens whenever you want (for rewards). DON'T revoke it.
-
-**Unlimited supply strategy:** Since you keep mint authority, you mint new tokens whenever you need to reward forum upvotes. You set the initial supply (say 100M), keep 70M for yourself, put 20M into the reward pool, and 10M for sale. Mint more as needed.
-
-**Available ticker suggestions:** $REPCHK, $RCHK, $AUTHCHECK, $LEGITCHK, $REALONE. On Solana, ticker names aren't reserved globally — you just pick whatever you want when creating.
-
-**Running costs:** Solana transactions cost ~£0.001 each. Even distributing 1,000 rewards/day = £1/day. Running a Solana validator node from your home computer is possible but overkill — just use pump.fun's infrastructure.`},
     { t: "📱 Building iPhone & Android Apps (Explained Like You're 5)", content: `
 **The easy way: Turn your website into an app using a "wrapper"**
 
@@ -691,8 +670,189 @@ Search "convert website to app" on Fiverr. Costs £50-150. They handle everythin
   )
 }
 
+// ─── PRIVACY POLICY PAGE ─────────────────────────────────────
+function PrivacyPage() {
+  return (
+    <div className="fade" style={{padding:"32px 0"}}>
+      <Label c={C.gold}>Legal</Label>
+      <h1 style={{fontFamily:"var(--d)",fontSize:32,fontWeight:500,marginBottom:24}}>Privacy Policy</h1>
+      <div className="card" style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>
+        <p style={{marginBottom:16}}><strong style={{color:C.text}}>Last Updated:</strong> January 2025</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>1. Introduction</h3>
+        <p style={{marginBottom:16}}>RepCheck.one ("we", "our", or "us") respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our luxury goods authentication service.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>2. Information We Collect</h3>
+        <p style={{marginBottom:8}}>We may collect the following types of information:</p>
+        <ul style={{marginLeft:24,marginBottom:16}}>
+          <li>Images you upload for authentication purposes</li>
+          <li>Device information and browser type</li>
+          <li>IP address and approximate location</li>
+          <li>Usage data and interaction with our service</li>
+          <li>Email address if you contact us or create an account</li>
+        </ul>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>3. How We Use Your Information</h3>
+        <p style={{marginBottom:8}}>We use collected information to:</p>
+        <ul style={{marginLeft:24,marginBottom:16}}>
+          <li>Provide authentication analysis on uploaded images</li>
+          <li>Improve our authentication algorithms and database</li>
+          <li>Communicate with you about our services</li>
+          <li>Display relevant advertisements through Google AdSense</li>
+          <li>Analyse website traffic and user behavior</li>
+        </ul>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>4. Third-Party Services</h3>
+        <p style={{marginBottom:16}}>We use third-party services including Google AdSense for advertising and Google Analytics for website analytics. These services may use cookies to collect information. Please refer to Google's Privacy Policy for more details.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>5. Cookies</h3>
+        <p style={{marginBottom:16}}>We use cookies to improve your experience on our site. These include essential cookies for site functionality and analytics/advertising cookies from third parties. You can control cookie preferences in your browser settings.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>6. Data Security</h3>
+        <p style={{marginBottom:16}}>We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>7. Your Rights</h3>
+        <p style={{marginBottom:16}}>Under GDPR and UK data protection laws, you have the right to access, correct, delete, or export your personal data. Contact us at privacy@repcheck.one to exercise these rights.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>8. Contact Us</h3>
+        <p>For privacy-related inquiries, email us at: <strong style={{color:C.gold}}>privacy@repcheck.one</strong></p>
+      </div>
+    </div>
+  )
+}
+
+// ─── TERMS OF SERVICE PAGE ───────────────────────────────────
+function TermsPage() {
+  return (
+    <div className="fade" style={{padding:"32px 0"}}>
+      <Label c={C.gold}>Legal</Label>
+      <h1 style={{fontFamily:"var(--d)",fontSize:32,fontWeight:500,marginBottom:24}}>Terms of Service</h1>
+      <div className="card" style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>
+        <p style={{marginBottom:16}}><strong style={{color:C.text}}>Last Updated:</strong> January 2025</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>1. Acceptance of Terms</h3>
+        <p style={{marginBottom:16}}>By accessing or using RepCheck.one, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>2. Service Description</h3>
+        <p style={{marginBottom:16}}>RepCheck.one provides an authentication analysis service for luxury goods. Our service uses image analysis and database comparison to provide opinions on the authenticity of items. <strong style={{color:C.red}}>Our assessments are opinions only and should not be considered definitive authentication.</strong></p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>3. Disclaimer of Warranties</h3>
+        <p style={{marginBottom:16}}>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. We do not guarantee the accuracy of our authentication opinions. RepCheck.one is not responsible for any financial loss or damage resulting from reliance on our assessments. Always seek professional authentication for high-value purchases.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>4. Limitation of Liability</h3>
+        <p style={{marginBottom:16}}>RepCheck.one shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service. Our maximum liability is limited to the amount you paid for our services (if any).</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>5. Intellectual Property</h3>
+        <p style={{marginBottom:16}}>All content on RepCheck.one, including text, graphics, logos, and software, is our property or licensed to us. Brand names mentioned on this site are trademarks of their respective owners. RepCheck.one is not affiliated with, endorsed by, or sponsored by any brand mentioned.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>6. User Content</h3>
+        <p style={{marginBottom:16}}>By uploading images to our service, you grant us a non-exclusive license to use, process, and analyse those images for authentication purposes and service improvement. You retain ownership of your images.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>7. Prohibited Uses</h3>
+        <p style={{marginBottom:8}}>You agree not to:</p>
+        <ul style={{marginLeft:24,marginBottom:16}}>
+          <li>Use the service for any illegal purpose</li>
+          <li>Upload malicious content or attempt to compromise our systems</li>
+          <li>Misrepresent our authentication opinions as official brand verification</li>
+          <li>Scrape or harvest data from our service</li>
+        </ul>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>8. Governing Law</h3>
+        <p style={{marginBottom:16}}>These terms are governed by the laws of England and Wales. Any disputes shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>9. Changes to Terms</h3>
+        <p style={{marginBottom:16}}>We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.</p>
+        
+        <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>10. Contact</h3>
+        <p>For questions about these terms, email: <strong style={{color:C.gold}}>legal@repcheck.one</strong></p>
+      </div>
+    </div>
+  )
+}
+
+// ─── ABOUT PAGE ──────────────────────────────────────────────
+function AboutPage() {
+  return (
+    <div className="fade" style={{padding:"32px 0"}}>
+      <Label c={C.gold}>About</Label>
+      <h1 style={{fontFamily:"var(--d)",fontSize:32,fontWeight:500,marginBottom:24}}>About RepCheck.one</h1>
+      
+      <div className="card" style={{marginBottom:16}}>
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>Our Mission</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>RepCheck.one was created to help consumers make informed decisions when purchasing luxury goods. In a market where counterfeit items are increasingly sophisticated, we provide accessible authentication tools and knowledge to protect buyers from fraud.</p>
+      </div>
+      
+      <div className="card" style={{marginBottom:16}}>
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>What We Do</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:12}}>We've built a comprehensive database of authentication markers, manufacturing details, and known counterfeit tells across hundreds of luxury brands. Our service analyses uploaded images against this database to provide detailed authentication opinions.</p>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid}}><strong style={{color:C.text}}>Important:</strong> Our assessments are informational opinions, not official brand authentication. For high-value purchases, we always recommend seeking professional authentication services.</p>
+      </div>
+      
+      <div className="card" style={{marginBottom:16}}>
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>Our Data Sources</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>Our authentication database is compiled from publicly available information including authentication forums, expert guides, official brand documentation, and community contributions. We continuously update our database as new information becomes available.</p>
+      </div>
+      
+      <div className="card">
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>Independent Service</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>RepCheck.one is an independent authentication service. We are not affiliated with, endorsed by, or sponsored by any luxury brand mentioned on this website. All brand names, logos, and trademarks are the property of their respective owners and are used solely for identification purposes.</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── CONTACT PAGE ────────────────────────────────────────────
+function ContactPage() {
+  return (
+    <div className="fade" style={{padding:"32px 0"}}>
+      <Label c={C.gold}>Get In Touch</Label>
+      <h1 style={{fontFamily:"var(--d)",fontSize:32,fontWeight:500,marginBottom:24}}>Contact Us</h1>
+      
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
+        <div className="card">
+          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>📧 General Enquiries</h3>
+          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For general questions about our service, partnership opportunities, or feedback:</p>
+          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>hello@repcheck.one</p>
+        </div>
+        
+        <div className="card">
+          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>🔒 Privacy Concerns</h3>
+          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For data protection requests, GDPR enquiries, or privacy-related matters:</p>
+          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>privacy@repcheck.one</p>
+        </div>
+        
+        <div className="card">
+          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>⚖️ Legal</h3>
+          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For legal enquiries, terms of service questions, or trademark matters:</p>
+          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>legal@repcheck.one</p>
+        </div>
+        
+        <div className="card">
+          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>🐛 Technical Support</h3>
+          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>Experiencing issues with our website or authentication tools?</p>
+          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>support@repcheck.one</p>
+        </div>
+      </div>
+      
+      <div className="card" style={{marginTop:16}}>
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>Response Times</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>We aim to respond to all enquiries within 2-3 business days. For urgent matters, please include "URGENT" in your email subject line.</p>
+      </div>
+      
+      <div className="card" style={{marginTop:16,background:C.goldBg,border:`1px solid ${C.gold}30`}}>
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>🏢 Business Address</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid}}>
+          RepCheck.one<br/>
+          United Kingdom<br/><br/>
+          <em style={{fontSize:12,color:C.textLight}}>Registered in England & Wales</em>
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ─── FOOTER ──────────────────────────────────────────────────
-function Footer() {
+function Footer({setPage}) {
   return (
     <footer style={{borderTop:`1px solid ${C.border}`,marginTop:40,padding:"28px 0 40px"}}>
       <div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:20}}>
@@ -701,19 +861,30 @@ function Footer() {
           <div style={{fontSize:11,color:C.textLight,lineHeight:1.7,maxWidth:240}}>The authentication standard for luxury goods. Trusted by collectors, dealers and enthusiasts worldwide since 2025.</div>
         </div>
         <div style={{display:"flex",gap:32}}>
-          {[
-            {h:"Product",ls:["Authenticate","Community","$REPCHK","Tools"]},
-            {h:"Company",ls:["About Us","Contact","Privacy Policy","Terms of Service","Cookie Policy"]},
-            {h:"Connect",ls:["Twitter / X","Discord","TikTok","Instagram","YouTube"]},
-          ].map(col=>(
-            <div key={col.h}>
-              <div style={{fontSize:10,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:C.textLight,marginBottom:8}}>{col.h}</div>
-              {col.ls.map(l=><div key={l} style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}}>{l}</div>)}
-            </div>
-          ))}
+          <div>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:C.textLight,marginBottom:8}}>Product</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.home)}>Authenticate</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.forum)}>Community</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.tools)}>Tools</div>
+          </div>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:C.textLight,marginBottom:8}}>Company</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.about)}>About Us</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.contact)}>Contact</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.privacy)}>Privacy Policy</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.terms)}>Terms of Service</div>
+          </div>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:C.textLight,marginBottom:8}}>Connect</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4}}>Twitter / X</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4}}>Discord</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4}}>Instagram</div>
+          </div>
         </div>
       </div>
-      <div style={{marginTop:20,paddingTop:16,borderTop:`1px solid ${C.border}`,fontSize:10,color:C.textDim,textAlign:"center"}}>© 2025 RepCheck.one · All rights reserved · Not affiliated with any brand mentioned · Ads by Google</div>
+      <div style={{marginTop:20,paddingTop:16,borderTop:`1px solid ${C.border}`,fontSize:10,color:C.textDim,textAlign:"center"}}>
+        © 2025 RepCheck.one · All rights reserved · RepCheck is an independent authentication service and is not affiliated with, endorsed by, or sponsored by any brand mentioned on this site. All brand names and trademarks are the property of their respective owners.
+      </div>
     </footer>
   )
 }
@@ -732,7 +903,11 @@ function RepCheckOne() {
         {page===P.tools && <ToolsPage/>}
         {page===P.admin && <AdminPage/>}
         {page===P.guides && <GuidesPage/>}
-        <Footer/>
+        {page===P.privacy && <PrivacyPage/>}
+        {page===P.terms && <TermsPage/>}
+        {page===P.about && <AboutPage/>}
+        {page===P.contact && <ContactPage/>}
+        <Footer setPage={setPage}/>
       </div>
     </div>
   )
