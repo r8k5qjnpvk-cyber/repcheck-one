@@ -106,10 +106,369 @@ const AdSlot = ({size = "728×90", label = "Advertisement"}) => (
   </div>
 )
 
+// ─── AUTHENTICATION UPLOAD COMPONENT ─────────────────────────
+function AuthenticationUpload() {
+  const [images, setImages] = useState([])
+  const [category, setCategory] = useState("")
+  const [brand, setBrand] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+  const fileInputRef = useRef(null)
+
+  const categories = [
+    {id: "watches", label: "⌚ Watches", brands: ["Rolex", "Omega", "Patek Philippe", "Audemars Piguet", "Cartier", "Tag Heuer", "Breitling", "IWC", "Other"]},
+    {id: "handbags", label: "👜 Handbags", brands: ["Louis Vuitton", "Chanel", "Hermès", "Gucci", "Prada", "Dior", "Goyard", "Bottega Veneta", "Other"]},
+    {id: "sneakers", label: "👟 Sneakers", brands: ["Nike", "Jordan", "Yeezy", "New Balance", "Travis Scott", "Off-White", "Dunk", "Other"]},
+    {id: "clothing", label: "🧥 Clothing", brands: ["Moncler", "Stone Island", "Supreme", "Balenciaga", "Gucci", "Arc'teryx", "Trapstar", "Corteiz", "Other"]},
+    {id: "sunglasses", label: "🕶 Sunglasses", brands: ["Ray-Ban", "Cartier", "Gucci", "Prada", "Dior", "Oakley", "Other"]},
+    {id: "jewelry", label: "💎 Jewelry", brands: ["Cartier", "Van Cleef & Arpels", "Tiffany & Co", "Bulgari", "Chrome Hearts", "Other"]},
+  ]
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length + images.length > 5) {
+      setError("Maximum 5 images allowed")
+      return
+    }
+    
+    files.forEach(file => {
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Each image must be under 10MB")
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImages(prev => [...prev, { file, preview: e.target.result, base64: e.target.result.split(',')[1] }])
+      }
+      reader.readAsDataURL(file)
+    })
+    setError(null)
+  }
+
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleAuthenticate = async () => {
+    if (images.length === 0) {
+      setError("Please upload at least one image")
+      return
+    }
+    if (!category) {
+      setError("Please select a category")
+      return
+    }
+    if (!brand) {
+      setError("Please select a brand")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setResult(null)
+
+    try {
+      const imageContents = images.map(img => ({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: img.file.type,
+          data: img.base64
+        }
+      }))
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 2000,
+          messages: [{
+            role: "user",
+            content: [
+              ...imageContents,
+              {
+                type: "text",
+                text: `You are an expert luxury goods authenticator. Analyze these images of a ${brand} ${category.replace('s', '')} and provide an authentication assessment.
+
+IMPORTANT: Provide your analysis in the following JSON format ONLY, no other text:
+{
+  "verdict": "LIKELY GENUINE" or "LIKELY REPLICA" or "INCONCLUSIVE",
+  "confidence": 0-100,
+  "summary": "Brief 1-2 sentence summary",
+  "details": [
+    {"marker": "marker name", "status": "pass" or "fail" or "unclear", "note": "explanation"}
+  ],
+  "recommendations": ["recommendation 1", "recommendation 2"]
+}
+
+Analyze: stitching quality, hardware/materials, fonts/engravings, serial numbers if visible, overall craftsmanship, common replica tells for this brand. Be thorough but concise.`
+              }
+            ]
+          }]
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.error) {
+        throw new Error(data.error.message || "Authentication failed")
+      }
+
+      const text = data.content[0].text
+      // Try to parse JSON from response
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0])
+        setResult(parsed)
+      } else {
+        // Fallback if not proper JSON
+        setResult({
+          verdict: "INCONCLUSIVE",
+          confidence: 50,
+          summary: text.substring(0, 200),
+          details: [],
+          recommendations: ["Please try again with clearer images"]
+        })
+      }
+    } catch (err) {
+      setError(err.message || "Authentication failed. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setImages([])
+    setCategory("")
+    setBrand("")
+    setResult(null)
+    setError(null)
+  }
+
+  const selectedCategory = categories.find(c => c.id === category)
+
+  return (
+    <div className="card" style={{marginBottom:32,padding:28}}>
+      <Label c={C.gold}>Free Authentication</Label>
+      <h2 style={{fontFamily:"var(--d)",fontSize:24,fontWeight:500,marginBottom:16}}>Upload Your Item</h2>
+      
+      {!result ? (
+        <>
+          {/* Image Upload Area */}
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              border:`2px dashed ${images.length > 0 ? C.gold : C.border}`,
+              borderRadius:12,
+              padding:images.length > 0 ? 16 : 40,
+              textAlign:"center",
+              cursor:"pointer",
+              background:images.length > 0 ? C.goldBg : C.bg,
+              transition:"all 0.2s",
+              marginBottom:16
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              style={{display:"none"}}
+            />
+            
+            {images.length === 0 ? (
+              <>
+                <div style={{fontSize:48,marginBottom:12}}>📷</div>
+                <div style={{fontSize:15,fontWeight:600,marginBottom:4}}>Drop images here or click to upload</div>
+                <div style={{fontSize:12,color:C.textLight}}>Up to 5 images, max 10MB each · JPG, PNG, HEIC</div>
+              </>
+            ) : (
+              <div style={{display:"flex",gap:12,flexWrap:"wrap",justifyContent:"center"}}>
+                {images.map((img, i) => (
+                  <div key={i} style={{position:"relative"}}>
+                    <img src={img.preview} alt={`Upload ${i+1}`} style={{width:80,height:80,objectFit:"cover",borderRadius:8,border:`2px solid ${C.gold}`}}/>
+                    <button 
+                      onClick={(e) => {e.stopPropagation(); removeImage(i)}}
+                      style={{position:"absolute",top:-8,right:-8,width:24,height:24,borderRadius:"50%",background:C.red,color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:700}}
+                    >×</button>
+                  </div>
+                ))}
+                {images.length < 5 && (
+                  <div style={{width:80,height:80,borderRadius:8,border:`2px dashed ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:C.textLight}}>+</div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Category Selection */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:12,fontWeight:600,marginBottom:8,color:C.textMid}}>Category</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => {setCategory(cat.id); setBrand("")}}
+                  className="btn"
+                  style={{
+                    padding:"10px 16px",
+                    borderRadius:8,
+                    border:`1px solid ${category === cat.id ? C.gold : C.border}`,
+                    background:category === cat.id ? C.goldBg : C.white,
+                    color:category === cat.id ? C.gold : C.textMid,
+                    fontSize:13,
+                    fontWeight:category === cat.id ? 600 : 400
+                  }}
+                >{cat.label}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Brand Selection */}
+          {selectedCategory && (
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:12,fontWeight:600,marginBottom:8,color:C.textMid}}>Brand</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {selectedCategory.brands.map(b => (
+                  <button
+                    key={b}
+                    onClick={() => setBrand(b)}
+                    className="btn"
+                    style={{
+                      padding:"8px 14px",
+                      borderRadius:8,
+                      border:`1px solid ${brand === b ? C.gold : C.border}`,
+                      background:brand === b ? C.goldBg : C.white,
+                      color:brand === b ? C.gold : C.textMid,
+                      fontSize:12,
+                      fontWeight:brand === b ? 600 : 400
+                    }}
+                  >{b}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div style={{padding:12,background:C.redBg,border:`1px solid ${C.red}30`,borderRadius:8,marginBottom:16,color:C.red,fontSize:13}}>
+              ⚠️ {error}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            onClick={handleAuthenticate}
+            disabled={loading || images.length === 0}
+            className="btn btn-gold"
+            style={{
+              width:"100%",
+              padding:"16px 32px",
+              fontSize:15,
+              opacity:loading || images.length === 0 ? 0.6 : 1,
+              cursor:loading || images.length === 0 ? "not-allowed" : "pointer"
+            }}
+          >
+            {loading ? (
+              <span>🔍 Analyzing... This may take 10-20 seconds</span>
+            ) : (
+              <span>🔍 Authenticate Now — Free</span>
+            )}
+          </button>
+          
+          <div style={{fontSize:11,color:C.textLight,textAlign:"center",marginTop:12}}>
+            Our AI analyzes stitching, hardware, fonts, materials & known replica tells
+          </div>
+        </>
+      ) : (
+        /* Results Display */
+        <div>
+          {/* Verdict Banner */}
+          <div style={{
+            padding:20,
+            borderRadius:12,
+            background:result.verdict === "LIKELY GENUINE" ? C.greenBg : result.verdict === "LIKELY REPLICA" ? C.redBg : C.goldBg,
+            border:`2px solid ${result.verdict === "LIKELY GENUINE" ? C.green : result.verdict === "LIKELY REPLICA" ? C.red : C.gold}30`,
+            textAlign:"center",
+            marginBottom:20
+          }}>
+            <div style={{fontSize:36,marginBottom:8}}>
+              {result.verdict === "LIKELY GENUINE" ? "✅" : result.verdict === "LIKELY REPLICA" ? "❌" : "⚠️"}
+            </div>
+            <div style={{
+              fontFamily:"var(--d)",
+              fontSize:28,
+              fontWeight:600,
+              color:result.verdict === "LIKELY GENUINE" ? C.green : result.verdict === "LIKELY REPLICA" ? C.red : C.gold
+            }}>
+              {result.verdict}
+            </div>
+            <div style={{fontSize:14,color:C.textMid,marginTop:4}}>
+              Confidence: {result.confidence}%
+            </div>
+          </div>
+
+          {/* Summary */}
+          <div style={{padding:16,background:C.bg,borderRadius:8,marginBottom:16}}>
+            <div style={{fontSize:12,fontWeight:600,color:C.textLight,marginBottom:4}}>SUMMARY</div>
+            <div style={{fontSize:14,color:C.text,lineHeight:1.6}}>{result.summary}</div>
+          </div>
+
+          {/* Details */}
+          {result.details && result.details.length > 0 && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:600,color:C.textLight,marginBottom:8}}>AUTHENTICATION MARKERS</div>
+              {result.details.map((d, i) => (
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.border}`}}>
+                  <span style={{fontSize:16}}>
+                    {d.status === "pass" ? "✅" : d.status === "fail" ? "❌" : "⚠️"}
+                  </span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:600}}>{d.marker}</div>
+                    <div style={{fontSize:12,color:C.textMid}}>{d.note}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {result.recommendations && result.recommendations.length > 0 && (
+            <div style={{padding:16,background:C.blueBg,borderRadius:8,marginBottom:20}}>
+              <div style={{fontSize:12,fontWeight:600,color:C.blue,marginBottom:8}}>💡 RECOMMENDATIONS</div>
+              {result.recommendations.map((r, i) => (
+                <div key={i} style={{fontSize:13,color:C.textMid,marginBottom:4}}>• {r}</div>
+              ))}
+            </div>
+          )}
+
+          {/* Disclaimer */}
+          <div style={{padding:12,background:C.bg2,borderRadius:8,marginBottom:16}}>
+            <div style={{fontSize:11,color:C.textLight,lineHeight:1.6}}>
+              <strong>Disclaimer:</strong> This AI-powered assessment is an opinion based on image analysis and should not be considered official authentication. For high-value items, we recommend professional in-person authentication. RepCheck.one is not liable for purchase decisions made based on this analysis.
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{display:"flex",gap:12}}>
+            <button onClick={resetForm} className="btn btn-gold" style={{flex:1,padding:"14px 24px"}}>
+              🔍 Check Another Item
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── NAV ─────────────────────────────────────────────────────
 function Nav({page, setPage}) {
   const links = [
-    {p:P.home, l:"Authenticate"}, {p:P.forum, l:"Community"},
+    {p:P.home, l:"Authenticate"},
     {p:P.tools, l:"Tools"}, {p:P.guides, l:"Guides"}
   ]
   return (
@@ -147,17 +506,13 @@ function HomePage({setPage}) {
       <div style={{textAlign:"center",padding:"56px 0 40px",position:"relative"}}>
         <div style={{position:"absolute",top:"20%",left:"50%",transform:"translate(-50%,-50%)",width:500,height:500,background:`radial-gradient(circle,${C.goldBg} 0%,transparent 60%)`,pointerEvents:"none"}}/>
         <div style={{position:"relative"}}>
-          <Label c={C.gold}>Trusted By 48,000+ Collectors & Dealers Worldwide</Label>
+          <Label c={C.gold}>AI-Powered Luxury Authentication</Label>
           <h1 style={{fontFamily:"var(--d)",fontSize:"clamp(40px,8vw,72px)",fontWeight:500,lineHeight:.95,margin:"12px 0 20px",letterSpacing:"-.02em"}}>
             Know What You're<br/><em style={{fontStyle:"italic",color:C.gold}}>Really</em> Buying
           </h1>
           <p style={{fontSize:16,color:C.textMid,maxWidth:520,margin:"0 auto",lineHeight:1.7}}>
-            Drop a photo of any luxury item. Watches, bags, trainers, clothes, shades, jewellery — we break down every stitch, stamp and serial and tell you if it's genuine.
+            Upload a photo of any luxury item. Our AI analyzes stitching, hardware, fonts, materials and known replica tells to give you an instant authentication report.
           </p>
-          <div style={{marginTop:28,display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-            <button className="btn btn-gold" style={{padding:"16px 36px",fontSize:14}}>Upload & Authenticate Free</button>
-            <button className="btn btn-out" onClick={()=>setPage(P.forum)}>Browse Community</button>
-          </div>
         </div>
       </div>
 
@@ -169,6 +524,9 @@ function HomePage({setPage}) {
           <span style={{fontSize:12,color:C.textLight}}>items authenticated and counting</span>
         </div>
       </div>
+      
+      {/* Authentication Upload Component */}
+      <AuthenticationUpload />
 
       {/* Stats Bar */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:32}}>
@@ -844,8 +1202,8 @@ function Footer({setPage}) {
           <div>
             <div style={{fontSize:10,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:C.textLight,marginBottom:8}}>Product</div>
             <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.home)}>Authenticate</div>
-            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.forum)}>Community</div>
             <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.tools)}>Tools</div>
+            <div style={{fontSize:12,color:C.textMid,marginBottom:4,cursor:"pointer"}} onClick={()=>setPage(P.guides)}>Guides</div>
           </div>
           <div>
             <div style={{fontSize:10,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:C.textLight,marginBottom:8}}>Company</div>
@@ -878,8 +1236,6 @@ function RepCheckOne() {
       <div style={{maxWidth:920,margin:"0 auto",padding:"0 20px"}}>
         <Nav page={page} setPage={setPage}/>
         {page===P.home && <HomePage setPage={setPage}/>}
-        {page===P.forum && <ForumPage/>}
-        {page===P.token && <TokenPage/>}
         {page===P.tools && <ToolsPage/>}
         {page===P.admin && <AdminPage/>}
         {page===P.guides && <GuidesPage/>}
