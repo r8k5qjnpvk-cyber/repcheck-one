@@ -715,7 +715,7 @@ function PrivacyPage() {
         <p style={{marginBottom:16}}>Under GDPR and UK data protection laws, you have the right to access, correct, delete, or export your personal data. Contact us at privacy@repcheck.one to exercise these rights.</p>
         
         <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>8. Contact Us</h3>
-        <p>For privacy-related inquiries, email us at: <strong style={{color:C.gold}}>privacy@repcheck.one</strong></p>
+        <p>For privacy-related inquiries, email us at: <strong style={{color:C.gold}}>hello@repcheck.one</strong></p>
       </div>
     </div>
   )
@@ -764,7 +764,7 @@ function TermsPage() {
         <p style={{marginBottom:16}}>We reserve the right to modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.</p>
         
         <h3 style={{color:C.text,marginTop:24,marginBottom:8}}>10. Contact</h3>
-        <p>For questions about these terms, email: <strong style={{color:C.gold}}>legal@repcheck.one</strong></p>
+        <p>For questions about these terms, email: <strong style={{color:C.gold}}>hello@repcheck.one</strong></p>
       </div>
     </div>
   )
@@ -808,30 +808,10 @@ function ContactPage() {
       <Label c={C.gold}>Get In Touch</Label>
       <h1 style={{fontFamily:"var(--d)",fontSize:32,fontWeight:500,marginBottom:24}}>Contact Us</h1>
       
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
-        <div className="card">
-          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>📧 General Enquiries</h3>
-          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For general questions about our service, partnership opportunities, or feedback:</p>
-          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>hello@repcheck.one</p>
-        </div>
-        
-        <div className="card">
-          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>🔒 Privacy Concerns</h3>
-          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For data protection requests, GDPR enquiries, or privacy-related matters:</p>
-          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>privacy@repcheck.one</p>
-        </div>
-        
-        <div className="card">
-          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>⚖️ Legal</h3>
-          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For legal enquiries, terms of service questions, or trademark matters:</p>
-          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>legal@repcheck.one</p>
-        </div>
-        
-        <div className="card">
-          <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>🐛 Technical Support</h3>
-          <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>Experiencing issues with our website or authentication tools?</p>
-          <p style={{fontSize:15,fontWeight:600,color:C.gold}}>support@repcheck.one</p>
-        </div>
+      <div className="card" style={{marginBottom:16}}>
+        <h3 style={{fontSize:18,fontWeight:600,marginBottom:12}}>📧 Contact</h3>
+        <p style={{fontSize:14,lineHeight:1.8,color:C.textMid,marginBottom:8}}>For all enquiries including general questions, support, privacy concerns, partnerships, and feedback:</p>
+        <p style={{fontSize:20,fontWeight:600,color:C.gold}}>hello@repcheck.one</p>
       </div>
       
       <div className="card" style={{marginTop:16}}>
