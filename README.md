@@ -76,3 +76,4 @@ See `docs/IMPLEMENTATION-GUIDE.md` for the full step-by-step guide covering:
 - Elite subscriptions (£24.99/mo)
 - $REPCHK token economy
 
+# RepCheck.one
